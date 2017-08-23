@@ -23,26 +23,16 @@ writer = csv.writer(open("./government.csv", "w"))
 writer.writerow(["Name", "Years", "Position", "Party", "State", "Congress", "Link"]) 
 
 # direct command to instruct BeautifulSoup to extract the exact HTML element we want
-trs = soup.find_all('tr')
+table = soup.find('tbody', attrs={'class': 'stripe'})
 
-# extract the data we want
-for tr in trs:
-    for link in tr.find_all('a'):
-        fullLink = link.get ('href')
+# extract the data we want and form it into a new list
+list_of_rows = [] 
+for row in table.findAll('a'):
+    list_of_cells = []
+    for cell in row.findAll('a'):
+        text = cell.text.replace('&nbsp;', '')
+        list_of_cells.append(text)
+    list_of_rows.append(list_of_cells)
 
-    tds = tr.find_all("td")
-# use a "try" because the table is not well formatted. This allows the program to continue after encountering an error.
-    try: 
-# isolate the item by its column in the table and converts it into a string.
-        years = str(tds[1].get_text())
-        names = str(tds[0].get_text())
-        positions = str(tds[2].get_text())
-        parties = str(tds[3].get_text())
-        states = str(tds[4].get_text())
-        congress = tds[5].get_text()
-
-    except:
-        print "bad tr string"
-        continue 
-
-    writer.writerow([names, years, positions, parties, states, congress, fullLink])
+# create and hand to new csv file
+writer.writerow(list_of_rows)
